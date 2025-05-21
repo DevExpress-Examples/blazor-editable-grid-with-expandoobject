@@ -19,12 +19,12 @@ namespace Expando.Services {
             var weatherForecasts = await GetForecastAsync(DateTime.Now);
             List<ExpandoObject> dynamicList = [];
             foreach (WeatherForecast weatherForecast in weatherForecasts) {
-                dynamic dynamicWeatherObject = new ExpandoObject();
-                dynamicWeatherObject.Id = Guid.NewGuid();
-                dynamicWeatherObject.Date = weatherForecast.Date;
-                dynamicWeatherObject.TemperatureC = weatherForecast.TemperatureC;
-                dynamicWeatherObject.Summary = weatherForecast.Summary;
-                dynamicList.Add(dynamicWeatherObject);
+                dynamic dynamicWeatherForecast = new ExpandoObject();
+                dynamicWeatherForecast.Id = Guid.NewGuid();
+                dynamicWeatherForecast.Date = weatherForecast.Date;
+                dynamicWeatherForecast.TemperatureC = weatherForecast.TemperatureC;
+                dynamicWeatherForecast.Summary = weatherForecast.Summary;
+                dynamicList.Add(dynamicWeatherForecast);
             }
             return dynamicList;
         }

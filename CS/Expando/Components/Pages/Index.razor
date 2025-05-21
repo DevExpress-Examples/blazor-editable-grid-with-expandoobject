@@ -6,8 +6,8 @@
 @rendermode InteractiveServer
 @inject WeatherForecastService ForecastService
 
-<PageTitle>Weather</PageTitle>
-<h1>Weather</h1>
+<PageTitle>Weather forecast</PageTitle>
+<h1>Weather forecast</h1>
 
 <DxComboBox Data="@gridEditModes" @bind-Value="selectedGridEditMode" />
 
@@ -21,9 +21,6 @@ else {
             CssClass="mw-1100"
             EditMode="@selectedGridEditMode"
             EditModelSaving="Grid_EditModelSaving"
-            ShowFilterRow="true"
-            ShowGroupPanel="true"
-            ShowSearchBox="true"
             DataItemDeleting="Grid_DataItemDeleting"
             CustomizeEditModel="Grid_CustomizeEditModel">
         <Columns>
@@ -80,12 +77,12 @@ else {
 
     private void Grid_CustomizeEditModel(GridCustomizeEditModelEventArgs e) {
         if (e.IsNew) {
-            var dynamicWeatherObject = (IDictionary<String, Object>)(new ExpandoObject());
-            dynamicWeatherObject["Id"] = Guid.NewGuid();
-            dynamicWeatherObject["Date"] = DateOnly.FromDateTime(DateTime.Now.AddDays(1));
-            dynamicWeatherObject["TemperatureC"] = 0;
-            dynamicWeatherObject["Summary"] = "";
-            e.EditModel = dynamicWeatherObject;
+            dynamic forecast = new ExpandoObject();
+            forecast.Id = Guid.NewGuid();
+            forecast.Date = DateOnly.FromDateTime(DateTime.Now.AddDays(1));
+            forecast.TemperatureC = 0;
+            forecast.Summary = "";
+            e.EditModel = forecast;
         }
     }
 
@@ -94,11 +91,13 @@ else {
             forecasts.Add((ExpandoObject)e.EditModel);
         }
         else {
-            var editableWeather = (IDictionary<String, Object>)e.EditModel;
-            var originalWeather = (IDictionary<String, Object>)forecasts.First(s => (Guid)((IDictionary<String, Object>)s)["Id"] == (Guid)editableWeather["Id"]);
-            originalWeather["Date"] = editableWeather["Date"];
-            originalWeather["TemperatureC"] = editableWeather["TemperatureC"];
-            originalWeather["Summary"] = editableWeather["Summary"];
+            dynamic editableForecast = (ExpandoObject)e.EditModel;
+            dynamic originalForecast = forecasts
+                .Cast<dynamic>()
+                .First(s => (Guid)s.Id == (Guid)editableForecast.Id);
+            originalForecast.Date = editableForecast.Date;
+            originalForecast.TemperatureC = editableForecast.TemperatureC;
+            originalForecast.Summary = editableForecast.Summary;
         }
     }
 
