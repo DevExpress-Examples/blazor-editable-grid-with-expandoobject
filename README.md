@@ -5,7 +5,7 @@
 <!-- default badges end -->
 # Product/Platform - Task
 
-This is the repository template for creating new examples. Describe the solved task here.
+This example demonstrates how to bind ExpandoObject collection to DxGrid.
 
 Put a screenshot that illustrates the result here.
 
