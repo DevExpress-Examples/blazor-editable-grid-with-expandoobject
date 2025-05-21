@@ -1,35 +1,108 @@
 ﻿@page "/"
-<PageTitle>Welcome</PageTitle>
 
-<div class="main-content">
-    <DxGridLayout CssClass="welcome-gridlayout" RowSpacing="3rem">
-        <Rows>
-            <DxGridLayoutRow Height="auto" Areas="header"></DxGridLayoutRow>
-            <DxGridLayoutRow Height="auto" Areas="cards"></DxGridLayoutRow>
-        </Rows>
-        <Items>
-            <DxGridLayoutItem Area="header" CssClass="title">
-                <Template>
-                    <div class="title-header-text">Hello World!</div>
-                    <div class="title-content-text">Welcome to your new DevExpress Blazor Application</div>
-                </Template>
-            </DxGridLayoutItem>
-            <DxGridLayoutItem Area="cards" CssClass="welcome-cards">
-                <Template>
-                    <NavLink class="welcome-card" href="@UrlGenerator.GetUrl("/grid", ToggledSidebar)">
-                        <svg class="welcome-card-img" alt="weather card">
-                            <use href="images/cards.svg#weather"></use>
-                        </svg>
-                        <div class="welcome-card-text">DxGrid</div>
-                        <div class="welcome-card-back"></div>
-                    </NavLink>
-                </Template>
-            </DxGridLayoutItem>
-        </Items>
-    </DxGridLayout>
-</div>
+@using Expando.Services
+@using System.Dynamic
+@attribute [StreamRendering(true)]
+@rendermode InteractiveServer
+@inject WeatherForecastService ForecastService
+
+<PageTitle>Weather</PageTitle>
+<h1>Weather</h1>
+
+<DxComboBox Data="@gridEditModes" @bind-Value="selectedGridEditMode" />
+
+@if (forecasts == null) {
+    <p>
+        <em>Loading...</em>
+    </p>
+}
+else {
+    <DxGrid Data="@forecasts"
+            CssClass="mw-1100"
+            EditMode="@selectedGridEditMode"
+            EditModelSaving="Grid_EditModelSaving"
+            ShowFilterRow="true"
+            ShowGroupPanel="true"
+            ShowSearchBox="true"
+            DataItemDeleting="Grid_DataItemDeleting"
+            CustomizeEditModel="Grid_CustomizeEditModel">
+        <Columns>
+            <DxGridCommandColumn EditButtonVisible="selectedGridEditMode != GridEditMode.EditCell" />
+
+            <DxGridDataColumn Caption="Date" FieldName="Date">
+                <CellEditTemplate>
+                    @{
+                        var editItem = (IDictionary<string, object>)context.EditModel;
+                        var date = (DateOnly)editItem["Date"];
+                    }
+                    <DxDateEdit Date="@(date)"
+                                DateChanged="@((DateOnly newVal) => editItem["Date"] = newVal)"
+                                DateExpression="@(() => date)">
+                    </DxDateEdit>
+                </CellEditTemplate>
+            </DxGridDataColumn>
+            <DxGridDataColumn Caption="Temperature °C" FieldName="TemperatureC">
+                <CellEditTemplate>
+                    @{
+                        var editItem = (IDictionary<string, object>)context.EditModel;
+                        var temp = (int)editItem["TemperatureC"];
+                    }
+                    <DxSpinEdit Value="@temp"
+                                ValueChanged="@((int newVal) => editItem["TemperatureC"] = newVal)"
+                                ValueExpression="@(() => temp)">
+                    </DxSpinEdit>
+                </CellEditTemplate>
+            </DxGridDataColumn>
+            <DxGridDataColumn Caption="Summary" FieldName="Summary">
+                <CellEditTemplate>
+                    @{
+                        var editItem = (IDictionary<string, object>)context.EditModel;
+                        var summary = (string)editItem["Summary"];
+                    }
+                    <DxTextBox Text="@summary"
+                               TextChanged="@((string newVal) => editItem["Summary"] = newVal)"
+                               TextExpression="@(() => summary)">
+                    </DxTextBox>
+                </CellEditTemplate>
+            </DxGridDataColumn>
+        </Columns>
+    </DxGrid>
+}
 
 @code {
-    [SupplyParameterFromQuery(Name = UrlGenerator.ToggleSidebarName)]
-    public bool ToggledSidebar { get; set; }
+    private GridEditMode[] gridEditModes = { GridEditMode.EditRow, GridEditMode.EditCell };
+    private GridEditMode selectedGridEditMode = GridEditMode.EditRow;
+    private List<ExpandoObject>? forecasts;
+
+    protected override async Task OnInitializedAsync() {
+        forecasts = await ForecastService.GetForecastAsyncExpando(DateTime.Now);
+    }
+
+    private void Grid_CustomizeEditModel(GridCustomizeEditModelEventArgs e) {
+        if (e.IsNew) {
+            var dynamicWeatherObject = (IDictionary<String, Object>)(new ExpandoObject());
+            dynamicWeatherObject["Id"] = Guid.NewGuid();
+            dynamicWeatherObject["Date"] = DateOnly.FromDateTime(DateTime.Now.AddDays(1));
+            dynamicWeatherObject["TemperatureC"] = 0;
+            dynamicWeatherObject["Summary"] = "";
+            e.EditModel = dynamicWeatherObject;
+        }
+    }
+
+    private async Task Grid_EditModelSaving(GridEditModelSavingEventArgs e) {
+        if (e.IsNew) {
+            forecasts.Add((ExpandoObject)e.EditModel);
+        }
+        else {
+            var editableWeather = (IDictionary<String, Object>)e.EditModel;
+            var originalWeather = (IDictionary<String, Object>)forecasts.First(s => (Guid)((IDictionary<String, Object>)s)["Id"] == (Guid)editableWeather["Id"]);
+            originalWeather["Date"] = editableWeather["Date"];
+            originalWeather["TemperatureC"] = editableWeather["TemperatureC"];
+            originalWeather["Summary"] = editableWeather["Summary"];
+        }
+    }
+
+    private async Task Grid_DataItemDeleting(GridDataItemDeletingEventArgs e) {
+        forecasts.Remove((ExpandoObject)e.DataItem);
+    }
 }
