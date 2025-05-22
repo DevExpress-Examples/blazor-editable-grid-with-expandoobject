@@ -40,11 +40,11 @@ else {
                 <CellEditTemplate>
                     @{
                         var editItem = (IDictionary<string, object>)context.EditModel;
-                        var temp = (int)editItem["TemperatureC"];
+                        var temperature = (int)editItem["TemperatureC"];
                     }
-                    <DxSpinEdit Value="@temp"
+                    <DxSpinEdit Value="@temperature"
                                 ValueChanged="@((int newVal) => editItem["TemperatureC"] = newVal)"
-                                ValueExpression="@(() => temp)">
+                                ValueExpression="@(() => temperature)">
                     </DxSpinEdit>
                 </CellEditTemplate>
             </DxGridDataColumn>
