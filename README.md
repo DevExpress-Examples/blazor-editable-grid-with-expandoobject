@@ -69,7 +69,7 @@ private async Task Grid_EditModelSaving(GridEditModelSavingEventArgs e) {
 }
 ```
 
-###5. Delete rows
+### 5. Delete rows
 In the [DataItemDeleting](https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxGrid.DataItemDeleting) event handler, remove the item from the collection.
 ```cs
 private async Task Grid_DataItemDeleting(GridDataItemDeletingEventArgs e) {
@@ -81,7 +81,7 @@ private async Task Grid_DataItemDeleting(GridDataItemDeletingEventArgs e) {
 
 ## Files to Review
 
-- [Index.razor](./CS/Expando/Pages/Index.razor (VB: link.vb)
+- [Index.razor](./CS/Expando/Pages/Index.razor)
 - [WeatherForecastService.cs](./CS/Expando/Services/WeatherForecastService.cs)
 - [Program.cs](./CS/Expando/Program.cs)
 
