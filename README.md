@@ -81,7 +81,7 @@ private async Task Grid_DataItemDeleting(GridDataItemDeletingEventArgs e) {
 
 ## Files to Review
 
-- [Index.razor](./CS/Expando/Pages/Index.razor)
+- [Index.razor](./CS/Expando/Components/Pages/Index.razor)
 - [WeatherForecastService.cs](./CS/Expando/Services/WeatherForecastService.cs)
 - [Program.cs](./CS/Expando/Program.cs)
 
