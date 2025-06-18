@@ -7,7 +7,7 @@
 
 The [DevExpress Blazor Grid's](https://docs.devexpress.com/Blazor/403143/components/grid) ability to create, modify, and delete rows extends to dynamic data sources. When bound to a collection of [ExpandoObject](https://learn.microsoft.com/en-us/dotnet/api/system.dynamic.expandoobject) instances, the grid can adapt to user-defined schemas from sources like JSON files or NoSQL databases. It allows you to implement CRUD (Create, Read, Update, Delete) operations when your data structure is not defined at compile time.
 
-This example implements a fully editable `DxGrid` bound to a dynamic `ExpandoObject` list, with support for adding, updating, and removing rows.
+This example implements a fully editable `DxGrid` bound to a dynamic `ExpandoObject` list.
 
 ![Edit ExpandoObject Data in DxGrid](images/grid-edit-expandoobject.gif)
 
