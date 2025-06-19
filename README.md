@@ -1,43 +1,30 @@
 <!-- default badges list -->
-![](https://img.shields.io/endpoint?url=https://codecentral.devexpress.com/api/v1/VersionRange/987706933/24.2.6%2B)
 [![](https://img.shields.io/badge/Open_in_DevExpress_Support_Center-FF7200?style=flat-square&logo=DevExpress&logoColor=white)](https://supportcenter.devexpress.com/ticket/details/T1292610)
 [![](https://img.shields.io/badge/📖_How_to_use_DevExpress_Examples-e9f6fc?style=flat-square)](https://docs.devexpress.com/GeneralInformation/403183)
 [![](https://img.shields.io/badge/💬_Leave_Feedback-feecdd?style=flat-square)](#does-this-example-address-your-development-requirementsobjectives)
 <!-- default badges end -->
-# Blazor Grid - Binding to an ExpandoObject Collection with Editing Support
+# Editable Blazor Grid with ExpandoObject Collection
 
-The DevExpress [Blazor Grid](https://docs.devexpress.com/Blazor/403143/components/grid) allows you to bind it to a collection of `ExpandoObject` with full editing capabilities, including row creation, editing, and deletion.
+The [DevExpress Blazor Grid's](https://docs.devexpress.com/Blazor/403143/components/grid) ability to create, modify, and delete rows extends to dynamic data sources. When bound to a collection of [ExpandoObject](https://learn.microsoft.com/en-us/dotnet/api/system.dynamic.expandoobject) instances, the grid can adapt to user-defined schemas from sources like JSON files or NoSQL databases. It allows you to implement CRUD (Create, Read, Update, Delete) operations when your data structure is not defined at compile time.
 
-![Edit ExpandoObject data in a DxGrid](grid-edit-expandoobject.gif)
+This example implements a fully editable `DxGrid` bound to a dynamic `ExpandoObject` list.
 
-## Key Features
-
-- Dynamic data binding using `ExpandoObject`
-- Full editing support:
-  - Inline editing with custom templates for `DateOnly`, `int`, `string` and other built-in types. 
-  - New row creation via the `CustomizeEditModel` event.
-  - Row update and delete operations with `EditModelSaving` and `DataItemDeleting` events.
+![Edit ExpandoObject Data in DxGrid](images/grid-edit-expandoobject.gif)
 
 ## Implementation Details
 
-### 1. Display the data in a DxGrid
-The DxGrid is bound to an ExpandoObject Collection. Each column includes a custom [CellEditTemplate](https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxGridCommandColumn.CellEditTemplate) with an editor bound to the ExpandoObject via `IDictionary<string, object>`.
-```razor
-<DxGridDataColumn Caption="Date" FieldName="Date">
-    <CellEditTemplate>
-        @{
-            var editItem = (IDictionary<string, object>)context.EditModel;
-            var date = (DateOnly)editItem["Date"];
-        }
-        <DxDateEdit Date="@(date)"
-                    DateChanged="@((DateOnly newVal) => editItem["Date"] = newVal)"
-                    DateExpression="@(() => date)">
-        </DxDateEdit>
-    </CellEditTemplate>
-</DxGridDataColumn>
+Create a collection of `ExpandoObject` that will hold your dynamic data. Populate it with initial entries.
+
+```cs
+private List<ExpandoObject>? forecasts;
+
+protected override async Task OnInitializedAsync() {
+    forecasts = await ForecastService.GetForecastAsyncExpando(DateTime.Now);
+}
 ```
-### 2. Handle edit model customization
-Create your own editing model in the [CustomizeEditModel](https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxGrid.CustomizeEditModel) event handler:
+
+Implement a custom edit model in the [CustomizeEditModel](https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxGrid.CustomizeEditModel) event handler:
+
 ```cs
 private void Grid_CustomizeEditModel(GridCustomizeEditModelEventArgs e) {
     if (e.IsNew) {
@@ -51,13 +38,14 @@ private void Grid_CustomizeEditModel(GridCustomizeEditModelEventArgs e) {
 }
 ```
 
-### 4. Save changes 
-Handle the [EditModelSaving](https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxGrid.EditModelSaving). In the event handler, retrieve data from your custom edit model to update the corresponding ExpandoObject item:
-```cs 
+Implement the [EditModelSaving](https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxGrid.EditModelSaving) event handler. It will retrieve data from your custom edit model and update the corresponding `ExpandoObject` instance.
+
+```cs
 private async Task Grid_EditModelSaving(GridEditModelSavingEventArgs e) {
     if (e.IsNew) {
         forecasts.Add((ExpandoObject)e.EditModel);
-    } else {
+    }
+    else {
         dynamic editableForecast = (ExpandoObject)e.EditModel;
         dynamic originalForecast = forecasts
             .Cast<dynamic>()
@@ -69,29 +57,55 @@ private async Task Grid_EditModelSaving(GridEditModelSavingEventArgs e) {
 }
 ```
 
-### 5. Delete rows
-In the [DataItemDeleting](https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxGrid.DataItemDeleting) event handler, remove the item from the collection.
+Implement the [DataItemDeleting](https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxGrid.DataItemDeleting) event handler, which will remove an item from the `ExpandoObject` collection.
+
 ```cs
 private async Task Grid_DataItemDeleting(GridDataItemDeletingEventArgs e) {
     forecasts.Remove((ExpandoObject)e.DataItem);
 }
 ```
 
+Add [DxGrid](https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxGrid) component to the [page](CS/Expando/Components/Pages/Index.razor) and bind it to the previously created `ExpandoObject` list. Attach event handlers to the corresponding grid properties.
 
+Add a custom [CellEditTemplate](https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxGridCommandColumn.CellEditTemplate) to each column to bind an inline editor to the `ExpandoObject` through `IDictionary<string, object>`.
+
+```razor
+<DxGrid Data="@forecasts"
+        EditMode="GridEditMode.EditRow"
+        CustomizeEditModel="Grid_CustomizeEditModel"
+        EditModelSaving="Grid_EditModelSaving"
+        DataItemDeleting="Grid_DataItemDeleting">
+    <Columns>
+        <DxGridCommandColumn />
+        <DxGridDataColumn Caption="Date" FieldName="Date">
+            <CellEditTemplate>
+                @{
+                    var editItem = (IDictionary<string, object>)context.EditModel;
+                    var date = (DateOnly)editItem["Date"];
+                }
+                <DxDateEdit Date="@(date)"
+                            DateChanged="@((DateOnly newVal) => editItem["Date"] = newVal)"
+                            DateExpression="@(() => date)">
+                </DxDateEdit>
+            </CellEditTemplate>
+        </DxGridDataColumn>
+        ...
+    </Columns>
+</DxGrid>
+```
 
 ## Files to Review
 
-- [Index.razor](./CS/Expando/Components/Pages/Index.razor)
-- [WeatherForecastService.cs](./CS/Expando/Services/WeatherForecastService.cs)
-- [Program.cs](./CS/Expando/Program.cs)
+- [Index.razor](CS/Expando/Components/Pages/Index.razor)
+- [WeatherForecastService.cs](CS/Expando/Services/WeatherForecastService.cs)
+- [Program.cs](CS/Expando/Program.cs)
 
 ## Documentation
 
+- [DxGrid Class](https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxGrid)
 - [Bind Blazor Grid to Data](https://docs.devexpress.com/Blazor/403737/components/grid/bind-to-data)
+- [Editing and Validation in Blazor Grid](https://docs.devexpress.com/Blazor/403454/components/grid/editing-and-validation)
 
-## More Examples
-
-- [WPF Data Grid - Bind to Dynamic Data](https://supportcenter.devexpress.com/ticket/details/t1091075/wpf-data-grid-bind-to-dynamic-data)
 <!-- feedback -->
 ## Does this example address your development requirements/objectives?
 
