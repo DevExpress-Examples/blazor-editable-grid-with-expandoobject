@@ -9,12 +9,14 @@
 <PageTitle>Weather forecast</PageTitle>
 <h1>Weather forecast</h1>
 
-@if (forecasts == null) {
+@if (forecasts == null)
+{
     <p>
         <em>Loading...</em>
     </p>
 }
-else {
+else
+{
     <DxGrid Data="@forecasts"
             CssClass="mw-1100"
             EditMode="GridEditMode.EditRow"
@@ -67,12 +69,15 @@ else {
 @code {
     private List<ExpandoObject>? forecasts;
 
-    protected override async Task OnInitializedAsync() {
+    protected override async Task OnInitializedAsync()
+    {
         forecasts = await ForecastService.GetForecastAsyncExpando(DateTime.Now);
     }
 
-    private void Grid_CustomizeEditModel(GridCustomizeEditModelEventArgs e) {
-        if (e.IsNew) {
+    private void Grid_CustomizeEditModel(GridCustomizeEditModelEventArgs e)
+    {
+        if (e.IsNew)
+        {
             dynamic forecast = new ExpandoObject();
             forecast.Id = Guid.NewGuid();
             forecast.Date = DateOnly.FromDateTime(DateTime.Now.AddDays(1));
@@ -82,11 +87,14 @@ else {
         }
     }
 
-    private async Task Grid_EditModelSaving(GridEditModelSavingEventArgs e) {
-        if (e.IsNew) {
+    private async Task Grid_EditModelSaving(GridEditModelSavingEventArgs e)
+    {
+        if (e.IsNew)
+        {
             forecasts.Add((ExpandoObject)e.EditModel);
         }
-        else {
+        else
+        {
             dynamic editableForecast = (ExpandoObject)e.EditModel;
             dynamic originalForecast = forecasts
                 .Cast<dynamic>()
@@ -97,7 +105,8 @@ else {
         }
     }
 
-    private async Task Grid_DataItemDeleting(GridDataItemDeletingEventArgs e) {
+    private async Task Grid_DataItemDeleting(GridDataItemDeletingEventArgs e)
+    {
         forecasts.Remove((ExpandoObject)e.DataItem);
     }
 }

@@ -8,10 +8,10 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Services.AddDevExpressBlazor(options => {
-    options.BootstrapVersion = DevExpress.Blazor.BootstrapVersion.v5;
     options.SizeMode = DevExpress.Blazor.SizeMode.Medium;
 });
 builder.Services.AddSingleton<WeatherForecastService>();
+builder.Services.AddScoped<DxThemesService>();
 builder.Services.AddMvc();
 
 var app = builder.Build();
