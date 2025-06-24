@@ -4,17 +4,17 @@
 [![](https://img.shields.io/badge/📖_How_to_use_DevExpress_Examples-e9f6fc?style=flat-square)](https://docs.devexpress.com/GeneralInformation/403183)
 [![](https://img.shields.io/badge/💬_Leave_Feedback-feecdd?style=flat-square)](#does-this-example-address-your-development-requirementsobjectives)
 <!-- default badges end -->
-# Editable Blazor Grid with ExpandoObject Collection
+# DevExpress Blazor Grid - ExpandoObject Collection Support
 
-The [DevExpress Blazor Grid's](https://docs.devexpress.com/Blazor/403143/components/grid) ability to create, modify, and delete rows extends to dynamic data sources. When bound to a collection of [ExpandoObject](https://learn.microsoft.com/en-us/dotnet/api/system.dynamic.expandoobject) instances, the grid can adapt to user-defined schemas from sources like JSON files or NoSQL databases. It allows you to implement CRUD (Create, Read, Update, Delete) operations when your data structure is not defined at compile time.
+The [DevExpress Blazor Grid's](https://docs.devexpress.com/Blazor/403143/components/grid) ability to create, modify, and delete rows extends to dynamic data sources. When bound to [ExpandoObject](https://learn.microsoft.com/en-us/dotnet/api/system.dynamic.expandoobject) collections, our Blazor grid can use user-defined schemas from sources such as JSON files or NoSQL databases. This, in turn, allows you to introduce CRUD (Create, Read, Update, Delete) operations if your data structure is not defined at compile time.
 
-This example implements a fully editable `DxGrid` bound to a dynamic `ExpandoObject` list.
+This example illustrates how you can add a fully editable DevExpress Blazor Grid (`DxGrid`) bound to a dynamic `ExpandoObject` list in your next great Blazor app.
 
 ![Edit ExpandoObject Data in DxGrid](images/grid-edit-expandoobject.gif)
 
 ## Implementation Details
 
-Create a collection of `ExpandoObject` that will hold your dynamic data. Populate it with initial entries.
+Create a `ExpandoObject` collection to store dynamic data. Populate it with initial entries.
 
 ```cs
 private List<ExpandoObject>? forecasts;
@@ -39,7 +39,7 @@ private void Grid_CustomizeEditModel(GridCustomizeEditModelEventArgs e) {
 }
 ```
 
-Implement the [EditModelSaving](https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxGrid.EditModelSaving) event handler. It will retrieve data from your custom edit model and update the corresponding `ExpandoObject` instance.
+Use the [EditModelSaving](https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxGrid.EditModelSaving) event handler to retrieve data from your custom edit model and update the corresponding `ExpandoObject` instance.
 
 ```cs
 private async Task Grid_EditModelSaving(GridEditModelSavingEventArgs e) {
@@ -58,7 +58,7 @@ private async Task Grid_EditModelSaving(GridEditModelSavingEventArgs e) {
 }
 ```
 
-Implement the [DataItemDeleting](https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxGrid.DataItemDeleting) event handler, which will remove an item from the `ExpandoObject` collection.
+Use the [DataItemDeleting](https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxGrid.DataItemDeleting) event handler to remove an item from the `ExpandoObject` collection.
 
 ```cs
 private async Task Grid_DataItemDeleting(GridDataItemDeletingEventArgs e) {
@@ -66,7 +66,7 @@ private async Task Grid_DataItemDeleting(GridDataItemDeletingEventArgs e) {
 }
 ```
 
-Add [DxGrid](https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxGrid) component to the [page](CS/Expando/Components/Pages/Index.razor) and bind it to the previously created `ExpandoObject` list. Attach event handlers to the corresponding grid properties.
+Add our Blazor Grid ([DxGrid](https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxGrid)) component to the [page](CS/Expando/Components/Pages/Index.razor) and bind it to the `ExpandoObject` list. Attach event handlers to corresponding grid properties.
 
 Add a custom [CellEditTemplate](https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxGridCommandColumn.CellEditTemplate) to each column to bind an inline editor to the `ExpandoObject` through `IDictionary<string, object>`.
 
